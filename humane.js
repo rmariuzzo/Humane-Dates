@@ -3,6 +3,7 @@
  * Copyright (c) 2008 Dean Landolt (deanlandolt.com)
  * Re-write by Zach Leatherman (zachleat.com)
  * Refactor by Chris Pearce (github.com/Chrisui)
+ * Modificatino by Rubens Mariuzzo (mariuzzo.com)
  *
  * Adopted from the John Resig's pretty.js
  * at http://ejohn.org/blog/javascript-pretty-date
@@ -12,25 +13,26 @@
  * Licensed under the MIT license.
  */
 
-;(function(root){
+;
+(function(root) {
 
 	var lang = {
-			ago: 'Ago',
-			from: '',
-			now: 'Just Now',
-			minute: 'Minute',
-			minutes: 'Minutes',
-			hour: 'Hour',
-			hours: 'Hours',
-			day: 'Day',
-			days: 'Days',
-			week: 'Week',
-			weeks: 'Weeks',
-			month: 'Month',
-			months: 'Months',
-			year: 'Year',
-			years: 'Years'
-		},
+		ago: '',
+		from: '',
+		now: 'now',
+		minute: 'm',
+		minutes: 'm',
+		hour: 'h',
+		hours: 'h',
+		day: 'd',
+		days: 'd',
+		week: 'w',
+		weeks: 'w',
+		month: 'm',
+		months: 'm',
+		year: 'y',
+		years: 'y'
+	},
 		formats = [
 			[60, lang.now],
 			[3600, lang.minute, lang.minutes, 60], // 60 minutes, 1 minute
@@ -41,36 +43,35 @@
 			[Infinity, lang.year, lang.years, 31536000] // Infinity, 1 year
 		];
 
-	function normalize(val, single)
-	{
+	function normalize(val, single) {
 		var margin = 0.1;
-		if(val >= single && val <= single * (1+margin)) {
+		if (val >= single && val <= single * (1 + margin)) {
 			return single;
 		}
 		return val;
 	}
 
-	root.humaneDate = function(date, compareTo){
+	root.humaneDate = function(date, compareTo) {
 
-		if(!date) {
+		if (!date) {
 			return;
 		}
 
 		var isString = typeof date == 'string',
 			date = isString ?
-						new Date(('' + date).replace(/-/g,"/").replace(/T|(?:\.\d+)?Z/g," ")) :
-						date,
+				new Date(('' + date).replace(/-/g, "/").replace(/T|(?:\.\d+)?Z/g, " ")) :
+				date,
 			compareTo = compareTo || new Date,
 			seconds = (compareTo - date +
-							(compareTo.getTimezoneOffset() -
-								// if we received a GMT time from a string, doesn't include time zone bias
-								// if we got a date object, the time zone is built in, we need to remove it.
-								(isString ? 0 : date.getTimezoneOffset())
-							) * 60000
-						) / 1000,
+				(compareTo.getTimezoneOffset() -
+					// if we received a GMT time from a string, doesn't include time zone bias
+					// if we got a date object, the time zone is built in, we need to remove it.
+					(isString ? 0 : date.getTimezoneOffset())
+				) * 60000
+			) / 1000,
 			token;
 
-		if(seconds < 0) {
+		if (seconds < 0) {
 			seconds = Math.abs(seconds);
 			token = lang.from ? ' ' + lang.from : '';
 		} else {
@@ -95,41 +96,39 @@
 		 * Single units are +10%. 1 Year shows first at 1 Year + 10%
 		 */
 
-		for(var i = 0, format = formats[0]; formats[i]; format = formats[++i]) {
-			if(seconds < format[0]) {
-				if(i === 0) {
+		for (var i = 0, format = formats[0]; formats[i]; format = formats[++i]) {
+			if (seconds < format[0]) {
+				if (i === 0) {
 					// Now
 					return format[1];
 				}
 
 				var val = Math.ceil(normalize(seconds, format[3]) / (format[3]));
 				return val +
-						' ' +
-						(val != 1 ? format[2] : format[1]) +
-						(i > 0 ? token : '');
+					' ' +
+					(val != 1 ? format[2] : format[1]) +
+					(i > 0 ? token : '');
 			}
 		}
 	};
 
-	if(typeof jQuery != 'undefined') {
-		jQuery.fn.humaneDates = function(options)
-		{
+	if (typeof jQuery != 'undefined') {
+		jQuery.fn.humaneDates = function(options) {
 			var settings = jQuery.extend({
 				'lowercase': false
 			}, options);
 
-			return this.each(function()
-			{
+			return this.each(function() {
 				var $t = jQuery(this),
 					date = $t.attr('datetime') || $t.attr('title');
 
 				date = humaneDate(date);
 
-				if(date && settings['lowercase']) {
+				if (date && settings['lowercase']) {
 					date = date.toLowerCase();
 				}
 
-				if(date && $t.html() != date) {
+				if (date && $t.html() != date) {
 					// don't modify the dom if we don't have to
 					$t.html(date);
 				}
